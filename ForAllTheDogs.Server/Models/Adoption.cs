@@ -1,6 +1,6 @@
 ﻿namespace ForAllTheDogs.Server.Models
 {
-    public class AdoptionModel
+    public class Adoption
     {
         public int petID;
         public string petName { get; set; } = string.Empty;
