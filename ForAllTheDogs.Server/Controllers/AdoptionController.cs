@@ -46,11 +46,32 @@ namespace ForAllTheDogs.Server.Controllers
 
         //Get Individual Pet
         [HttpGet("{id}")]
-        public JsonResult GetSinglePet()
+        public JsonResult GetSinglePet(int id)
         {
+            string query = "select petId, petName, petDescription, petBreed, petPhotoFileName, petAge where petId = @petId";
+            DataTable table = new DataTable();
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            SqlDataReader myReader;
+            using (SqlConnection myCon = new SqlConnection(sqlDataSource))
+            {
+                myCon.Open();
+                using (SqlCommand myCommand = new SqlCommand(query, myCon))
+                {
+                    myCommand.Parameters.AddWithValue("@petId", id);
+                    myReader = myCommand.ExecuteReader();
+                    table.Load(myReader);
+                    myReader.Close();
+                    myCon.Close();
+                }
+            }
 
+            return new JsonResult(table);
 
         }
+
+    }
 
         //Insert New Pet
         [HttpPost]
