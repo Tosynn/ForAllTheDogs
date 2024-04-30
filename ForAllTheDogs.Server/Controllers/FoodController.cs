@@ -1,6 +1,8 @@
 ﻿using ForAllTheDogs.Server.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace ForAllTheDogs.Server.Controllers
 {
@@ -20,13 +22,51 @@ namespace ForAllTheDogs.Server.Controllers
         [HttpGet]
         public JsonResult GetFoods()
         {
+            string query = "select * from dbo.Food";
+            DataTable table = new DataTable();
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            SqlDataReader myReader;
+            using (SqlConnection myCon = new SqlConnection(sqlDataSource))
+            {
+                myCon.Open();
+                using (SqlCommand myCommand = new SqlCommand(query, myCon))
+                {
+                    myReader = myCommand.ExecuteReader();
+                    table.Load(myReader);
+                    myReader.Close();
+                    myCon.Close();
+                }
+            }
 
+            return new JsonResult(table);
         }
 
         //Get Individual Food
         [HttpGet("{id}")]
-        public JsonResult GetSingleFood()
+        public JsonResult GetSingleFood(int id)
         {
+            string query = "select foodId, foodName, foodDescription where foodId = @foodId";
+            DataTable table = new DataTable();
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            SqlDataReader myReader;
+            using (SqlConnection myCon = new SqlConnection(sqlDataSource))
+            {
+                myCon.Open();
+                using (SqlCommand myCommand = new SqlCommand(query, myCon))
+                {
+                    myCommand.Parameters.AddWithValue("@foodId", id);
+                    myReader = myCommand.ExecuteReader();
+                    table.Load(myReader);
+                    myReader.Close();
+                    myCon.Close();
+                }
+            }
+
+            return new JsonResult(table);
 
         }
 
