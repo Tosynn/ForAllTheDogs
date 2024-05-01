@@ -14,8 +14,8 @@ namespace ForAllTheDogs.Server.Controllers
         private readonly IWebHostEnvironment _env;
         public MemesController(IWebHostEnvironment env, IConfiguration configuration)
         {
-            _env = env;
-            _configuration = configuration;
+            _env = env ?? throw new ArgumentNullException(nameof(env));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         //Get All Memes Data
@@ -73,14 +73,38 @@ namespace ForAllTheDogs.Server.Controllers
 
         //Insert New Meme
         [HttpPost]
-        public JsonResult PostMeme(Adoption adp)
+        public JsonResult PostMeme(Memes mms)
         {
+            string query = "insert into dbo.Memes (memePhotoName, dateCreated) values (@memePhotoName, @dateCreated)";
+            DataTable table = new DataTable();
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            SqlDataReader myReader;
+            using (SqlConnection myCon = new SqlConnection(sqlDataSource))
+            {
+                myCon.Open();
+                using (SqlCommand myCommand = new SqlCommand(query, myCon))
+                {
+                    myCommand.Parameters.AddWithValue("@memePhotoName", mms.memePhotoName);
+                    myCommand.Parameters.AddWithValue("@dateCreated", mms.dateCreated);
+                    myReader = myCommand.ExecuteReader();
+                    table.Load(myReader);
+                    myReader.Close();
+                    myCon.Close();
+
+                }
+            }
+
+            return new JsonResult("Meme Added Successfully");
 
         }
 
+    }
+
         //Update Meme Data
         [HttpPut]
-        public JsonResult PutMeme(Adoption adp)
+        public JsonResult PutMeme(Adoption mms)
         {
 
         }
@@ -88,7 +112,7 @@ namespace ForAllTheDogs.Server.Controllers
         //Delete Meme Data
         [HttpDelete]
 
-        public JsonResult DeleteMeme(Adoption adp)
+        public JsonResult DeleteMeme(Adoption mms)
         {
 
         }

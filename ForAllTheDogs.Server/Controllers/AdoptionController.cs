@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using System.Data;
 
 namespace ForAllTheDogs.Server.Controllers
@@ -14,8 +15,8 @@ namespace ForAllTheDogs.Server.Controllers
         private readonly IWebHostEnvironment _env;
         public AdoptionController(IWebHostEnvironment env, IConfiguration configuration)
         {
-            _env = env;
-            _configuration = configuration;
+            _env = env ?? throw new ArgumentNullException(nameof(env));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         //Get All Pets Data
@@ -77,6 +78,30 @@ namespace ForAllTheDogs.Server.Controllers
         [HttpPost]
         public JsonResult PostPet(Adoption adp)
         {
+            string query = "insert into dbo.Adoption (petDescription, petBreed, petPhotoFileName, petAge) values (@petDescription, @petBreed, @petPhotoFileName, @petAge)";
+            DataTable table = new DataTable();
+    #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
+    #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            SqlDataReader myReader;
+            using (SqlConnection myCon = new SqlConnection(sqlDataSource))
+            {
+                myCon.Open();
+                using (SqlCommand myCommand = new SqlCommand(query, myCon))
+                {
+                    myCommand.Parameters.AddWithValue("@petDescription", adp.petDescription);
+                    myCommand.Parameters.AddWithValue("@petBreed", adp.petBreed);
+                    myCommand.Parameters.AddWithValue("@petPhotoFileName", adp.petPhotoFileName);
+                    myCommand.Parameters.AddWithValue("@petAge", adp.petAge);
+                    myReader = myCommand.ExecuteReader();
+                    table.Load(myReader);
+                    myReader.Close();
+                    myCon.Close();
+
+                }
+            }
+
+            return new JsonResult("Pet Added Successfully");
 
         }
 

@@ -14,8 +14,8 @@ namespace ForAllTheDogs.Server.Controllers
         private readonly IWebHostEnvironment _env;
         public FoodController(IWebHostEnvironment env, IConfiguration configuration)
         {
-            _env = env;
-            _configuration = configuration;
+            _env = env ?? throw new ArgumentNullException(nameof(env));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         //Get All Foods Data
@@ -72,14 +72,36 @@ namespace ForAllTheDogs.Server.Controllers
 
         //Insert New Food
         [HttpPost]
-        public JsonResult PostFood(Adoption adp)
+        public JsonResult PostFood(Food fds)
         {
+            string query = "insert into dbo.Food (foodName, foodDescription) values (@foodName, @foodDescription)";
+            DataTable table = new DataTable();
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            SqlDataReader myReader;
+            using (SqlConnection myCon = new SqlConnection(sqlDataSource))
+            {
+                myCon.Open();
+                using (SqlCommand myCommand = new SqlCommand(query, myCon))
+                {
+                    myCommand.Parameters.AddWithValue("@memePhotoName", fds.foodName);
+                    myCommand.Parameters.AddWithValue("@dateCreated", fds.foodDescription);
+                    myReader = myCommand.ExecuteReader();
+                    table.Load(myReader);
+                    myReader.Close();
+                    myCon.Close();
+
+                }
+            }
+
+            return new JsonResult("New Food Added Successfully");
 
         }
 
         //Update Food Data
         [HttpPut]
-        public JsonResult PutFood(Adoption adp)
+        public JsonResult PutFood(Adoption fds)
         {
 
         }
@@ -87,7 +109,7 @@ namespace ForAllTheDogs.Server.Controllers
         //Delete Food Data
         [HttpDelete]
 
-        public JsonResult DeleteFood(Adoption adp)
+        public JsonResult DeleteFood(Adoption fds)
         {
 
         }
