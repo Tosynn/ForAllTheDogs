@@ -101,15 +101,37 @@ namespace ForAllTheDogs.Server.Controllers
 
         //Update Food Data
         [HttpPut]
-        public JsonResult PutFood(Adoption fds)
+        public JsonResult PutFood(Food fds)
         {
+            string query = "update dbo.Food set foodName = @foodName, foodDescription = @foodDescription";
+            DataTable table = new DataTable();
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            SqlDataReader myReader;
+            using (SqlConnection myCon = new SqlConnection(sqlDataSource))
+            {
+                myCon.Open();
+                using (SqlCommand myCommand = new SqlCommand(query, myCon))
+                {
+                    myCommand.Parameters.AddWithValue("@foodId", fds.foodId);
+                    myCommand.Parameters.AddWithValue("@foodName", fds.foodName);
+                    myCommand.Parameters.AddWithValue("@foodDescription", fds.foodDescription);
+                    myReader = myCommand.ExecuteReader();
+                    table.Load(myReader);
+                    myReader.Close();
+                    myCon.Close();
+                }
+            }
+
+            return new JsonResult("Updated Successfully");
 
         }
 
         //Delete Food Data
         [HttpDelete]
 
-        public JsonResult DeleteFood(Adoption fds)
+        public JsonResult DeleteFood(Food fds)
         {
 
         }

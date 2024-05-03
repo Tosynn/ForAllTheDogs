@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using System.Data;
+using System.Runtime.Intrinsics.Arm;
 
 namespace ForAllTheDogs.Server.Controllers
 {
@@ -104,15 +106,36 @@ namespace ForAllTheDogs.Server.Controllers
 
         //Update Meme Data
         [HttpPut]
-        public JsonResult PutMeme(Adoption mms)
+        public JsonResult PutMeme(Memes mms)
         {
-
+        string query = "update dbo.Memes set memePhotoName = @memePhotoName, dateCreated = @dateCreated";
+        DataTable table = new DataTable();
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+        string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+        SqlDataReader myReader;
+        using (SqlConnection myCon = new SqlConnection(sqlDataSource))
+        {
+            myCon.Open();
+            using (SqlCommand myCommand = new SqlCommand(query, myCon))
+            {
+                myCommand.Parameters.AddWithValue("@memeId", mms.memeId);
+                myCommand.Parameters.AddWithValue("@memePhotoName", mms.memePhotoName);
+                myCommand.Parameters.AddWithValue("@dateCreated", mms.dateCreated);
+                myReader = myCommand.ExecuteReader();
+                table.Load(myReader);
+                myReader.Close();
+                myCon.Close();
+            }
         }
+
+        return new JsonResult("Updated Successfully");
+    }
 
         //Delete Meme Data
         [HttpDelete]
 
-        public JsonResult DeleteMeme(Adoption mms)
+        public JsonResult DeleteMeme(Memes mms)
         {
 
         }
