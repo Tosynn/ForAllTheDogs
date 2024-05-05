@@ -32,7 +32,7 @@ namespace ForAllTheDogs.Server.Controllers
             using (SqlConnection myCon = new SqlConnection(sqlDataSource))
             {
                 myCon.Open();
-                using (SqlCommand myCommand = new SqlCommand(query,myCon))
+                using (SqlCommand myCommand = new SqlCommand(query, myCon))
                 {
                     myReader = myCommand.ExecuteReader();
                     table.Load(myReader);
@@ -72,24 +72,22 @@ namespace ForAllTheDogs.Server.Controllers
 
         }
 
-    }
-
         //Insert New Pet
         [HttpPost]
         public JsonResult PostPet(Adoption adp)
         {
             string query = "insert into dbo.Adoption (petName, petDescription, petBreed, petPhotoFileName, petAge) values (@petName, @petDescription, @petBreed, @petPhotoFileName, @petAge)";
             DataTable table = new DataTable();
-    #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
-    #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             SqlDataReader myReader;
             using (SqlConnection myCon = new SqlConnection(sqlDataSource))
             {
                 myCon.Open();
                 using (SqlCommand myCommand = new SqlCommand(query, myCon))
                 {
-                myCommand.Parameters.AddWithValue("@petName", adp.petName);
+                    myCommand.Parameters.AddWithValue("@petName", adp.petName);
                     myCommand.Parameters.AddWithValue("@petDescription", adp.petDescription);
                     myCommand.Parameters.AddWithValue("@petBreed", adp.petBreed);
                     myCommand.Parameters.AddWithValue("@petPhotoFileName", adp.petPhotoFileName);
@@ -110,39 +108,87 @@ namespace ForAllTheDogs.Server.Controllers
         [HttpPut]
         public JsonResult PutPet(Adoption adp)
         {
-        string query = "update dbo.Adoption set petName = @petName, petDescription = @petDescription, petBreed = @petBreed, petPhotoFileName = @petPhotoFileName, petAge = @petAge";
-        DataTable table = new DataTable();
-        string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
-        SqlDataReader myReader;
-        using (SqlConnection myCon = new SqlConnection(sqlDataSource))
-        {
-            myCon.Open();
-            using (SqlCommand myCommand = new SqlCommand(query, myCon))
+            string query = "update dbo.Adoption set petName = @petName, petDescription = @petDescription, petBreed = @petBreed, petPhotoFileName = @petPhotoFileName, petAge = @petAge";
+            DataTable table = new DataTable();
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            SqlDataReader myReader;
+            using (SqlConnection myCon = new SqlConnection(sqlDataSource))
             {
-                myCommand.Parameters.AddWithValue("@petId", adp.petId);
-                myCommand.Parameters.AddWithValue("@petName", adp.petName);
-                myCommand.Parameters.AddWithValue("@petDescription", adp.petDescription);
-                myCommand.Parameters.AddWithValue("@petBreed", adp.petBreed);
-                myCommand.Parameters.AddWithValue("@petPhotoFileName", adp.petPhotoFileName);
-                myCommand.Parameters.AddWithValue("@petAge", adp.petAge);
-                myReader = myCommand.ExecuteReader();
-                table.Load(myReader);
-                myReader.Close();
-                myCon.Close();
+                myCon.Open();
+                using (SqlCommand myCommand = new SqlCommand(query, myCon))
+                {
+                    myCommand.Parameters.AddWithValue("@petId", adp.petId);
+                    myCommand.Parameters.AddWithValue("@petName", adp.petName);
+                    myCommand.Parameters.AddWithValue("@petDescription", adp.petDescription);
+                    myCommand.Parameters.AddWithValue("@petBreed", adp.petBreed);
+                    myCommand.Parameters.AddWithValue("@petPhotoFileName", adp.petPhotoFileName);
+                    myCommand.Parameters.AddWithValue("@petAge", adp.petAge);
+                    myReader = myCommand.ExecuteReader();
+                    table.Load(myReader);
+                    myReader.Close();
+                    myCon.Close();
+                }
             }
-        }
 
-        return new JsonResult("Pet Info Updated Successfully");
+            return new JsonResult("Pet Info Updated Successfully");
 
         }
 
         //Delete Pet Data
-        [HttpDelete]
+        [HttpDelete("{id}")]
 
-        public JsonResult DeletePet(Adoption adp)
+        public JsonResult DeletePet(int id)
         {
+            string query = "delete from dbo.Adoption where petId=@petId";
+            DataTable table = new DataTable();
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            SqlDataReader myReader;
+            using (SqlConnection myCon = new SqlConnection(sqlDataSource))
+            {
+                myCon.Open();
+                using (SqlCommand myCommand = new SqlCommand(query, myCon))
+                {
+                    myCommand.Parameters.AddWithValue("@petId", id);
+                    myReader = myCommand.ExecuteReader();
+                    table.Load(myReader);
+                    myReader.Close();
+                    myCon.Close();
+                }
+            }
+            return new JsonResult("Deleted Succussfully");
 
         }
-        
+
+        //Save Images
+        [Route("SaveFile")]
+        [HttpPost]
+        public JsonResult SaveFile()
+        {
+            try
+            {
+                var httpRequest = Request.Form;
+                var postedFile = httpRequest.Files[0];
+                string fileName = postedFile.FileName;
+                var physicalPath = _env.ContentRootPath + "/Photos/Pets/" + fileName;
+
+                using (var stream=new FileStream(physicalPath, FileMode.Create))
+                {
+                    postedFile.CopyTo(stream);
+                }
+
+                return new JsonResult(fileName);
+            }
+            catch (Exception)
+            {
+                return new JsonResult("anonymous.png");
+            }
+        }
+
     }
+
+       
 }

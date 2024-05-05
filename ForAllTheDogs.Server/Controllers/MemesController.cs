@@ -1,4 +1,5 @@
-﻿using ForAllTheDogs.Server.Models;
+﻿using Azure.Core;
+using ForAllTheDogs.Server.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -102,42 +103,88 @@ namespace ForAllTheDogs.Server.Controllers
 
         }
 
-    }
 
         //Update Meme Data
         [HttpPut]
         public JsonResult PutMeme(Memes mms)
         {
-        string query = "update dbo.Memes set memePhotoName = @memePhotoName, dateCreated = @dateCreated";
-        DataTable table = new DataTable();
+            string query = "update dbo.Memes set memePhotoName = @memePhotoName, dateCreated = @dateCreated";
+            DataTable table = new DataTable();
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-        string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
+            string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
-        SqlDataReader myReader;
-        using (SqlConnection myCon = new SqlConnection(sqlDataSource))
-        {
-            myCon.Open();
-            using (SqlCommand myCommand = new SqlCommand(query, myCon))
+            SqlDataReader myReader;
+            using (SqlConnection myCon = new SqlConnection(sqlDataSource))
             {
-                myCommand.Parameters.AddWithValue("@memeId", mms.memeId);
-                myCommand.Parameters.AddWithValue("@memePhotoName", mms.memePhotoName);
-                myCommand.Parameters.AddWithValue("@dateCreated", mms.dateCreated);
-                myReader = myCommand.ExecuteReader();
-                table.Load(myReader);
-                myReader.Close();
-                myCon.Close();
+                myCon.Open();
+                using (SqlCommand myCommand = new SqlCommand(query, myCon))
+                {
+                    myCommand.Parameters.AddWithValue("@memeId", mms.memeId);
+                    myCommand.Parameters.AddWithValue("@memePhotoName", mms.memePhotoName);
+                    myCommand.Parameters.AddWithValue("@dateCreated", mms.dateCreated);
+                    myReader = myCommand.ExecuteReader();
+                    table.Load(myReader);
+                    myReader.Close();
+                    myCon.Close();
+                }
             }
-        }
 
-        return new JsonResult("Updated Successfully");
-    }
+            return new JsonResult("Updated Successfully");
+        }
 
         //Delete Meme Data
         [HttpDelete]
 
-        public JsonResult DeleteMeme(Memes mms)
+        public JsonResult DeleteMeme(int id)
         {
+            string query = "delete from dbo.Memes where memeId=@memeId";
+            DataTable table = new DataTable();
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+            SqlDataReader myReader;
+            using (SqlConnection myCon = new SqlConnection(sqlDataSource))
+            {
+                myCon.Open();
+                using (SqlCommand myCommand = new SqlCommand(query, myCon))
+                {
+                    myCommand.Parameters.AddWithValue("@memeId", id);
+                    myReader = myCommand.ExecuteReader();
+                    table.Load(myReader);
+                    myReader.Close();
+                    myCon.Close();
+                }
+            }
+            return new JsonResult("Deleted Succussfully");
 
         }
+
+        //Save Images
+        [Route("SaveFile")]
+        [HttpPost]
+        public JsonResult SaveFile()
+        {
+            try
+            {
+                var httpRequest = Request.Form;
+                var postedFile = httpRequest.Files[0];
+                string fileName = postedFile.FileName;
+                var physicalPath = _env.ContentRootPath + "/Photos/Memes/" + fileName;
+
+                using (var stream = new FileStream(physicalPath, FileMode.Create))
+                {
+                    postedFile.CopyTo(stream);
+                }
+
+                return new JsonResult(fileName);
+            }
+            catch (Exception)
+            {
+                return new JsonResult("anonymous.png");
+            }
+        }
+
     }
+
+       
 }

@@ -9,7 +9,7 @@
         
         public string petPhotoFileName { get; set; } = string.Empty;
 
-        public int petAge;
+        public string petAge { get; set; } = string.Empty;
 
     }
 }
