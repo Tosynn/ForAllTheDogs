@@ -51,7 +51,7 @@ namespace ForAllTheDogs.Server.Controllers
         [HttpGet("{id}")]
         public JsonResult GetSingleMeme(int id)
         {
-            string query = "select memeId, memePhotoFileName where memeId = @memeId";
+            string query = "select memeId, memePhotoFileName from dbo.Memes where memeId = @memeId";
             DataTable table = new DataTable();
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");

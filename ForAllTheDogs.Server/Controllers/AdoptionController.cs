@@ -49,7 +49,7 @@ namespace ForAllTheDogs.Server.Controllers
         [HttpGet("{id}")]
         public JsonResult GetSinglePet(int id)
         {
-            string query = "select petId, petName, petDescription, petBreed, petPhotoFileName, petAge where petId = @petId";
+            string query = "select petId, petName, petDescription, petBreed, petPhotoFileName, petAge from dbo.Adoption where petId = @petId";
             DataTable table = new DataTable();
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
@@ -184,7 +184,7 @@ namespace ForAllTheDogs.Server.Controllers
             }
             catch (Exception)
             {
-                return new JsonResult("anonymous.png");
+                return new JsonResult("Error saving file!");
             }
         }
 

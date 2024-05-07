@@ -47,7 +47,7 @@ namespace ForAllTheDogs.Server.Controllers
         [HttpGet("{id}")]
         public JsonResult GetSingleFood(int id)
         {
-            string query = "select foodId, foodName, foodDescription where foodId = @foodId";
+            string query = "select foodId, foodName, foodDescription from dbo.Food where foodId = @foodId";
             DataTable table = new DataTable();
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             string sqlDataSource = _configuration.GetConnectionString("DefaultConnection");
