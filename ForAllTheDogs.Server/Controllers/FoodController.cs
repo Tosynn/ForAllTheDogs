@@ -165,7 +165,7 @@ namespace ForAllTheDogs.Server.Controllers
                 var httpRequest = Request.Form;
                 var postedFile = httpRequest.Files[0];
                 string fileName = postedFile.FileName;
-                var physicalPath = _env.ContentRootPath + "/Photos/Food/" + fileName;
+                var physicalPath = _env.ContentRootPath + "/Photos/Foods/" + fileName;
 
                 using (var stream = new FileStream(physicalPath, FileMode.Create))
                 {
