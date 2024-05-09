@@ -72,7 +72,7 @@ namespace ForAllTheDogs.Server.Controllers
 
         //Insert New Food
         [HttpPost]
-        public JsonResult PostFood(Food fds)
+        public JsonResult PostFood(Foods fds)
         {
             string query = "insert into dbo.Food (foodName, foodDescription) values (@foodName, @foodDescription)";
             DataTable table = new DataTable();
@@ -101,7 +101,7 @@ namespace ForAllTheDogs.Server.Controllers
 
         //Update Food Data
         [HttpPut]
-        public JsonResult PutFood(Food fds)
+        public JsonResult PutFood(Foods fds)
         {
             string query = "update dbo.Food set foodName = @foodName, foodDescription = @foodDescription";
             DataTable table = new DataTable();

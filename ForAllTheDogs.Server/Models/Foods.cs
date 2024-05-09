@@ -1,6 +1,6 @@
 ﻿namespace ForAllTheDogs.Server.Models
 {
-    public class Food
+    public class Foods
     {
         public int foodId { get; set; }
         public string foodName { get; set; } = string.Empty;
