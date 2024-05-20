@@ -3,18 +3,18 @@ import Layout from "./pages/Layout";
 import Home from "./pages/Home";
 import Memes from "./pages/Memes";
 import Foods from "./pages/Foods";
-import Nopage from "./pages/NoPage";
+import NoPage from "./pages/NoPage";
 import './App.css';
-import NoPage from './pages/NoPage';
+
 
 export default function App() {
     return (
         <BrowserRouter>
-            <Routes path="/" element={<Layout /> }>
+            <Routes path="/" element={<Layout />}>
                 <Route index element={<Home />} />
                 <Route path="Memes" element={<Memes />} />
-                <Route path="Foods" element={<Foods /> } />
-                <Route path="*" element={<NoPage /> } />
+                <Route path="Foods" element={<Foods />} />
+                <Route path="*" element={<NoPage />} />
             </Routes>
         </BrowserRouter>
     );
