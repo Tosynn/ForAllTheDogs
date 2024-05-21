@@ -42,7 +42,7 @@ const Home = () => {
     );
 
             async function populateAdoptionData() {
-            const response = await fetch('api/adoption');
+            const response = await fetch('adoption');
             const data = await response.json();
             setAdoption(data);
             }
